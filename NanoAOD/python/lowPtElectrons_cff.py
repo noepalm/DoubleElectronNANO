@@ -42,7 +42,8 @@ isoForLowPtEle = cms.EDProducer(
 modifiedIDLowPtElectrons = cms.EDProducer(
     "lowPtIDProducer",
     src = cms.InputTag("isoForLowPtEle"),
-    modelFile = cms.string("RecoEgamma/ElectronIdentification/data/LowPtElectrons/electron_id_JPsiToEE2023_10Jun2025_all.root"),
+    #modelFile = cms.string("RecoEgamma/ElectronIdentification/data/LowPtElectrons/electron_id_JPsiToEE2023_10Jun2025_all.root"),
+    modelFile  = cms.string("PhysicsTools/BParkingNano/data/LowPtElectrons/electron_id_JPsiToEE2023_10Jun2025_all.root"),
     rho = cms.InputTag("fixedGridRhoFastjetAll"),
     isMC = cms.bool(True),
     doMatch = cms.bool(True),
