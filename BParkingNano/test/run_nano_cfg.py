@@ -77,10 +77,10 @@ options.register('mode', "reco",
     "Run standard reco ('reco'), efficiency study ('eff'), or trigger matching study ('trg')"
 )
 
-options.setDefault('maxEvents', 1000)
+options.setDefault('maxEvents', -1)
 options.setDefault('tag', '130X')
 options.parseArguments()
-print(options)
+#print(options)
 
 globaltag = None
 
@@ -327,7 +327,7 @@ process.load('PhysicsTools.BParkingNano.nanoBPark_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
+# process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
 # process.MessageLogger.cerr.threshold = "DEBUG"
 # process.MessageLogger.debugModules = ["*"]
 
@@ -419,6 +419,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.nanoAOD_DiEle_step,
+#                                process.testProducer,
                                 process.endjob_step,
                                 process.NANOAODoutput_step)
 
@@ -437,6 +438,11 @@ process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
 ### from https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3287/1/1/1/1/1.html
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 process.NANOAODoutput.fakeNameForCrab=cms.untracked.bool(True)
+
+#print("=== SCHEDULE ===")
+#for path in process.paths:
+#    print(f"Path: {path}")
+#    print(process.paths[path].dumpPython())
 
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete

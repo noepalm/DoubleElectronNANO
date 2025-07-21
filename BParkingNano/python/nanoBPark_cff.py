@@ -89,6 +89,7 @@ def nanoAOD_customizeEle(process):
 #     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
+    print("\033[92m in nanoAOD_customizeElectronFilteredBPark \033[0m ")
     process.nanoDiEleSequence     = cms.Sequence(electronsBParkSequence + electronBParkTables)
     return process
 

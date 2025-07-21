@@ -20,6 +20,7 @@ myelectronMVAValueMapProducer = cms.EDProducer(
 
 # change modifiedLowPtElectrons input to use embedded trigger matching
 modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
+#updatedLowPtElectrons.src  = cms.InputTag("modifiedLowPtElectrons")
 
 # compute electron seed gain
 seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"))
@@ -36,10 +37,16 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     )
 )
 
+modifiedIDLowPtElectrons.src = cms.InputTag("updatedLowPtElectrons")
+
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("updatedLowPtElectrons"),
+    userFloats = cms.PSet(
+        ids = cms.InputTag("modifiedIDLowPtElectrons:ids"),
+    ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainEleLowPt"),
+        matchedToGenEle = cms.InputTag("modifiedIDLowPtElectrons:matchedToGenEle"),
     ),
 )
 
@@ -233,6 +240,8 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         convTrail = Var("userInt('convTrail')",bool,doc="Matched to trailing track from conversion"),
         convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
         skipEle = Var("userInt('skipEle')",bool,doc="Is ele skipped (due to small dR or large dZ w.r.t. trigger)?"),
+        newID = Var("userFloat('ids')", float, doc="new run3 ID", precision=6),
+        matchedToGenEle = Var("userInt('matchedToGenEle')", int, doc="matched to gen ele"),
         )
 )
 
@@ -292,12 +301,14 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     docString = cms.string("MC matching to status==1 electrons or photons"),
 )
     
+print("\033[93m before electronsBParkSequence \033[0m")
 electronsBParkSequence = cms.Sequence(
     modifiedLowPtElectrons +
     updatedLowPtElectrons +
     myelectronMVAValueMapProducer +
     seedGainElePF +
     seedGainEleLowPt +
+    modifiedIDLowPtElectrons +
     slimmedPFElectronsWithUserData +
     slimmedLowPtElectronsWithUserData +
     electronsForAnalysis
