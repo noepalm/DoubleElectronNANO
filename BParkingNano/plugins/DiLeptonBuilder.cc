@@ -71,14 +71,17 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   
   for(size_t l1_idx = 0; l1_idx < leptons->size(); ++l1_idx) {
     edm::Ptr<Lepton> l1_ptr(leptons, l1_idx);
-    if(!l1_selection_(*l1_ptr)) continue; 
+    if(!l1_selection_(*l1_ptr) && !filter_by_selection_) continue;
     
     for(size_t l2_idx = l1_idx + 1; l2_idx < leptons->size(); ++l2_idx) {
       edm::Ptr<Lepton> l2_ptr(leptons, l2_idx);
-      if(!l2_selection_(*l2_ptr)) continue;
+      if(!l2_selection_(*l2_ptr) && !filter_by_selection_) continue;
 
       pat::CompositeCandidate lepton_pair;
+      lepton_pair.addUserInt("l1_sel", l1_selection_(*l1_ptr));
+      lepton_pair.addUserInt("l2_sel", l2_selection_(*l2_ptr));
       lepton_pair.setP4(l1_ptr->p4() + l2_ptr->p4());
+
       lepton_pair.setCharge(l1_ptr->charge() + l2_ptr->charge());
       lepton_pair.addUserFloat("lep_deltaR", reco::deltaR(*l1_ptr, *l2_ptr));
       int nlowpt=0;
@@ -105,8 +108,20 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserFloat("sv_chi2", fitter.chi2());
       lepton_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       lepton_pair.addUserFloat("sv_prob", fitter.prob());
+      // vertex variables
+      lepton_pair.addUserFloat("sv_x", fitter.success() ? fitter.fitted_vtx().x() : -1);
+      lepton_pair.addUserFloat("sv_y", fitter.success() ? fitter.fitted_vtx().y() : -1);
+      lepton_pair.addUserFloat("sv_z", fitter.success() ? fitter.fitted_vtx().z() : -1);
+
       lepton_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       lepton_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
+      // add fitted single lepton variables
+      lepton_pair.addUserFloat("l1_postfit_pt", fitter.success() ? fitter.daughter_p4(0).pt() : -1);
+      lepton_pair.addUserFloat("l1_postfit_eta", fitter.success() ? fitter.daughter_p4(0).eta() : -1);
+      lepton_pair.addUserFloat("l1_postfit_phi", fitter.success() ? fitter.daughter_p4(0).phi() : -1);
+      lepton_pair.addUserFloat("l2_postfit_pt", fitter.success() ? fitter.daughter_p4(1).pt() : -1);
+      lepton_pair.addUserFloat("l2_postfit_eta", fitter.success() ? fitter.daughter_p4(1).eta() : -1);
+      lepton_pair.addUserFloat("l2_postfit_phi", fitter.success() ? fitter.daughter_p4(1).phi() : -1);      
       // if needed, add here more stuff
 
       // cut on the SV info

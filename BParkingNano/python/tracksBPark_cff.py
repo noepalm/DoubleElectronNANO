@@ -3,23 +3,22 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 tracksBPark = cms.EDProducer('TrackMerger',
                              beamSpot   = cms.InputTag("offlineBeamSpot"),
-                             trgLepton    = cms.InputTag("muonTrgSelector:trgMuons"),
+                             trgLepton  = cms.InputTag("electronTrgSelector:trgElectrons"),
                              tracks     = cms.InputTag("packedPFCandidates"),
                              lostTracks = cms.InputTag("lostTracks"),
                              trkPtCut = cms.double(0.5),
                              muons      = cms.InputTag("slimmedMuons"),
-                             pfElectrons= cms.InputTag("slimmedElectrons"),
+                             pfElectrons= cms.InputTag("customSlimmedElectrons"),
                              vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                             lowPtElectrons=cms.InputTag("slimmedLowPtElectrons"),
+                             lowPtElectrons=cms.InputTag(""), # don't include slimmedLowPtElectrons among tracks
                              trkEtaCut = cms.double(2.5),
                              filterTrack = cms.bool(True),
                              dzTrg_cleaning = cms.double(1.),
                              drTrg_Cleaning = cms.double(0.03),
                              dcaSig = cms.double(-100000),
                              trkNormChiMin = cms.int32(-1),
-                             trkNormChiMax = cms.int32(-1)
-                            )
-
+                             trkNormChiMax = cms.int32(-1),
+)
 
 trackBParkTable = cms.EDProducer(
     "SimpleCompositeCandidateFlatTableProducer",
@@ -92,19 +91,6 @@ tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + 
 # Modifiers
 ###########
 
-from PhysicsTools.BParkingNano.modifiers_cff import *
+# from PhysicsTools.BParkingNano.modifiers_cff import *
 
-_modifiers = BToKMuMu_OpenConfig | BToKEE_OpenConfig
-_modifiers.toModify(tracksBPark,
-                    trkPtCut=0.5,
-                    trkEtaCut=2.5,
-                    trkNormChiMin=-1,
-                    trkNormChiMax=-1,
-                    dcaSig=-100000,
-                    #dzTrg_cleaning=-1.,
-                    #drTrg_Cleaning=-1.,
-                    filterTrack=False)
-
-BToKEE_DiEle.toModify(tracksBPark,
-                      trgLepton = "electronTrgSelector:trgElectrons",
-                      lowPtElectrons = "") # don't use "slimmedLowPtElectrons"
+# DiEle.toModify(tracksBPark)

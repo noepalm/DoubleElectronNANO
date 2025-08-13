@@ -1,0 +1,126 @@
+common:
+  data:
+    splitting: 20
+    globaltag: 124X_dataRun3_PromptAnalysis_v1
+    lumimask: https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/Cert_Collisions2022_355100_362760_Golden.json
+  mc:
+    splitting: 1
+    globaltag: 130X_mcRun3_2022_realistic_v5
+samples:
+  Run2022C_part%d:
+    dataset: /ParkingDoubleElectronLowMass%d/Run2022C-PromptReco-v1/MINIAOD
+    isMC: False
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+  Run2022Dv1_part%d:
+    dataset: /ParkingDoubleElectronLowMass%d/Run2022D-PromptReco-v1/MINIAOD
+    isMC: False
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+  Run2022Dv2_part%d:
+    dataset: /ParkingDoubleElectronLowMass%d/Run2022D-PromptReco-v2/MINIAOD
+    isMC: False
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+  Run2022E_part%d:
+    dataset: /ParkingDoubleElectronLowMass%d/Run2022E-PromptReco-v1/MINIAOD
+    isMC: False
+    globaltag: 124X_dataRun3_Prompt_v10
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+  Run2022F_part%d:
+    dataset: /ParkingDoubleElectronLowMass%d/Run2022F-22Sep2023-v1/MINIAOD
+    isMC: False
+    globaltag: 130X_dataRun3_PromptAnalysis_v1
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+  Run2022G_part%d:
+    dataset: /ParkingDoubleElectronLowMass%d/Run2022G-22Sep2023-v1/MINIAOD
+    isMC: False
+    globaltag: 130X_dataRun3_PromptAnalysis_v1
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+  BuToKJpsi_Toee_2022preEE:
+    dataset: /BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2/MINIAODSIM
+    isMC: True
+    dbs: global
+  BuToKJpsi_Toee_2022postEE:
+    dataset: /BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_postEE_v6
+    dbs: global
+  JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2022preEE:
+    dataset: /JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_v5
+    dbs: global
+  JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2022postEE:
+    dataset: /JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_postEE_v6
+    dbs: global
+  JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2022preEE:
+    dataset: /JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_v5
+    dbs: global
+  JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2022postEE:
+    dataset: /JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_postEE_v6
+    dbs: global
+  UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2022preEE:
+    dataset: /UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_v5
+    dbs: global
+  UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2022postEE:
+    dataset: /UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_postEE_v6
+    dbs: global
+  UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2022preEE:
+    dataset: /UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_v5
+    dbs: global
+  UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2022postEE:
+    dataset: /UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_postEE_v6
+    dbs: global
+  InclusiveDileptonMinBias:
+    dataset: /InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/Run3Summer22MiniAODv4-validDigi_130X_mcRun3_2022_realistic_v5-v4/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2022_realistic_v5
+    dbs: global

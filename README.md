@@ -1,54 +1,53 @@
 # NanoAOD producer customized for BParking analyses 
 
-The focus is on RK/K*/phi analyses.
+This is a custom NANOAOD producer, based on the one developed for RK/K*/phi analyses, repurposed for analyses focused on the search for dielectron resonances.
 
 ## Recipe
 
-This recipe is for 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
+This recipe is for 13_3_0, based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
+
+Currently using release CMSSW_13_3_0 to be able to run on 2023 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID. This version has implemented the changes from [ppviscone/DoubleElectronNANO/14_0_18](https://github.com/pviscone/DoubleElectronNANO/tree/14_0_18) for a cleaner inclusion of NANOAOD variables.
 
 ### Getting started
 
 ```shell
-scram list CMSSW
-cmsrel CMSSW_12_4_8
-cd CMSSW_12_4_8/src
+cmsrel CMSSW_13_3_0
+cd CMSSW_13_3_0/src
 cmsenv
-```
 
-### Add modifications needed to use post-fit quantities for electrons
-
-```shell
+# Modifications to use post-fit quantities for electrons
 git cms-merge-topic -u DiElectronX:GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
+# Modifications to KinematicParticleVertexFitter
+git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X
+
+# Add the DoubleElectronNANO package
+git clone -b 13_3_0 git@github.com:noepalm/DoubleElectronNANO.git ./PhysicsTools
+
+# Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons + disabled Electron, LowPtElectron
+git cms-merge-topic -u noepalm:DoubleElectronNANO_nanoaodFix_noEleTable_leptonIso_1330
+
+# Adding EgammaPostRecoTools for Run 3 noIso electron ID fix (including Piero's fix for correct interplay with our custom Electron collections) 
+git clone -b dpee git@github.com:pviscone/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
+
+# Build
+scram b -j `nproc`
 ```
 
-### Add modifications to KinematicParticleVertexFitter
+### Run on a test file
 
 ```shell
-git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Add the BParkingNano package
-
-```shell
-git clone git@github.com:DiElectronX/BParkingNANO.git ./PhysicsTools
-git cms-merge-topic -u DiElectronX:NanoAOD_131X
-```
-
-### Build and run on a test file
-
-```shell
-cd $CMSSW_BASE/src/
-scram b -j 8
 cd PhysicsTools/BParkingNano/test
-cmsRun run_nano_cfg.py        # by default, runs over Run 3 data
-cmsRun run_nano_cfg.py isMC=1 # runs over MC for 2022
+cmsRun run_nano_cfg.py        # by default, runs over Run 3 2023 data
+cmsRun run_nano_cfg.py isMC=1 # runs over BuToKJPsi_JPsiToEE MC for 2023
 ```
 
-### Submit CRAB jobs to process Run 3 data and 2022 MC 
+### Submit CRAB jobs to process Run 3 data and MC for 2022/2023
 
 ```shell
 cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/production
+source /cvmfs/cms.cern.ch/common/crab-setup.sh
 python3 submit_on_crab.py
+# or ./run.sh for preconfig commands
 ```
 
 ---

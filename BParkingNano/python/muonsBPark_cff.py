@@ -146,25 +146,22 @@ muonTriggerMatchedTables = cms.Sequence(muonTriggerMatchedTable)   ####
 
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-BToKMuMu_OpenConfig.toModify(muonTrgSelector,filterMuon=False)
-BToKMuMu_OpenConfig.toModify(countTrgMuons,minNumber=0)
-
-BToKMuMu_DiMuon.toModify(muonTrgSelector,
-                         ptMin=4.0,
-                         HLTPaths=["HLT_DoubleMu4_JpsiTrk_Displaced"]
-)
-BToKMuMu_DiMuon.toModify(muonBParkTable,
-                         variables = dict(
-                             fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
-                             fired_HLT_Mu7_IP4 = None,
-                             fired_HLT_Mu8_IP6 = None,
-                             fired_HLT_Mu8_IP5 = None,
-                             fired_HLT_Mu8_IP3 = None,
-                             fired_HLT_Mu8p5_IP3p5 = None,
-                             fired_HLT_Mu9_IP6 = None,
-                             fired_HLT_Mu9_IP5 = None,
-                             fired_HLT_Mu9_IP4 = None,
-                             fired_HLT_Mu10p5_IP3p5 = None,
-                             fired_HLT_Mu12_IP6 = None,
-                         )
-)
+# BToKMuMu_DiMuon.toModify(muonTrgSelector,
+#                          ptMin=4.0,
+#                          HLTPaths=["HLT_DoubleMu4_JpsiTrk_Displaced"]
+# )
+# BToKMuMu_DiMuon.toModify(muonBParkTable,
+#                          variables = dict(
+#                              fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
+#                              fired_HLT_Mu7_IP4 = None,
+#                              fired_HLT_Mu8_IP6 = None,
+#                              fired_HLT_Mu8_IP5 = None,
+#                              fired_HLT_Mu8_IP3 = None,
+#                              fired_HLT_Mu8p5_IP3p5 = None,
+#                              fired_HLT_Mu9_IP6 = None,
+#                              fired_HLT_Mu9_IP5 = None,
+#                              fired_HLT_Mu9_IP4 = None,
+#                              fired_HLT_Mu10p5_IP3p5 = None,
+#                              fired_HLT_Mu12_IP6 = None,
+#                          )
+# )

@@ -1,0 +1,46 @@
+common:
+  data:
+    splitting: 20
+    globaltag: 140X_dataRun3_v20 #for 2024 C D E, 140X_dataRun3_Prompt_v4 for F G H I
+    lumimask: https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions24/Cert_Collisions2024_378981_386951_Golden.json
+  mc:
+    splitting: 1
+    globaltag: 140X_mcRun3_2024_realistic_v26
+
+samples:
+  Run2024C_part%d:
+    dataset: /ParkingVBF%d/Run2024C-2024CDEReprocessing-v1/MINIAOD
+    isMC: False
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+  Run2024D_part%d:
+    dataset: /ParkingVBF%d/Run2024D-2024CDEReprocessing-v1/MINIAOD
+    isMC: False
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+  Run2024E_part%d:
+    dataset: /ParkingVBF%d/Run2024E-2024CDEReprocessing-v1/MINIAOD
+    isMC: False
+    parts:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7

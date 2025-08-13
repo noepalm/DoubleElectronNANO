@@ -261,15 +261,15 @@ void ElectronTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup&
 	  if(electron.triggerObjectMatches().size()!=0){
 	    for(size_t i=0;i<electron.triggerObjectMatches().size(); i++){
 	      if(debug>1) {
-		std::cout << "  iMatch=" << i << " PathNames=";
-		for(auto const & name : electron.triggerObjectMatch(i)->pathNames()){
-		  std::cout << " " << name;
-		}
-		std::cout << " AlgoNames=";
-		for(auto const & name : electron.triggerObjectMatch(i)->algorithmNames()){
-		  std::cout << " " << name;
-		}
-		std::cout << std::endl;
+          std::cout << "  iMatch=" << i << " PathNames=";
+          for(auto const & name : electron.triggerObjectMatch(i)->pathNames()){
+            std::cout << " " << name;
+          }
+          std::cout << " AlgoNames=";
+          for(auto const & name : electron.triggerObjectMatch(i)->algorithmNames()){
+            std::cout << " " << name;
+          }
+          std::cout << std::endl;
 	      }
 	      if(electron.triggerObjectMatch(i)!=0 && electron.triggerObjectMatch(i)->hasAlgorithmName(cstr,true)){
 		sds[iseed]=1;
