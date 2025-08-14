@@ -88,6 +88,9 @@ public:
       if ( !pf_mvaId_src_Tag_.label().empty() ) {
         pf_mvaId_src_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId") );
       }
+      if ( !pf_mvaIdcustom_src_Tag_.label().empty() ) {
+        pf_mvaIdcustom_src_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaIdcustom") );
+      }  
       if ( !pf_mvaId_src_Tag_run2_.label().empty() ) {
         pf_mvaId_src_run2_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run2") );
       }
@@ -122,6 +125,8 @@ private:
   std::unique_ptr<EffectiveAreas> ea_pfiso_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
   const edm::InputTag pf_mvaId_src_Tag_;
+  edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaIdcustom_src_;
+  const edm::InputTag pf_mvaIdcustom_src_Tag_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run2_;
   const edm::InputTag pf_mvaId_src_Tag_run2_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run3_;
@@ -162,6 +167,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   evt.getByToken(pf_src_, pf);
   edm::Handle<edm::ValueMap<float> > pfmvaId;
   if ( !pf_mvaId_src_Tag_.label().empty() ) { evt.getByToken(pf_mvaId_src_, pfmvaId); }
+  edm::Handle<edm::ValueMap<float> > pfmvaIdcustom;
+  if ( !pf_mvaIdcustom_src_Tag_.label().empty() ) { evt.getByToken(pf_mvaIdcustom_src_, pfmvaIdcustom); }    
   edm::Handle<edm::ValueMap<float> > pfmvaId_run2;
   if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { evt.getByToken(pf_mvaId_src_run2_, pfmvaId_run2); }
   edm::Handle<edm::ValueMap<float> > pfmvaId_run3;
@@ -266,6 +273,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    float pf_mva_id_run2_iso = ele.userFloat("ElectronMVAEstimatorRun2Fall17IsoV2Values");
    float pf_mva_id_run3_iso = ele.userFloat("ElectronMVAEstimatorRun2RunIIIWinter22IsoV1Values");
 
+   float pf_mvacustom_id = 20.;
+   if ( !pf_mvaIdcustom_src_Tag_.label().empty() ) { pf_mvacustom_id = float((*pfmvaIdcustom)[ref]); }
+   else pf_mvacustom_id = ele.userFloat("ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues");   
+
 
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
@@ -274,6 +285,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1Value", 20.); // was called "unBiased"
    ele.addUserFloat("LPEleMvaID_2020Sept15Value", 20.); // was called "mvaId"
    ele.addUserFloat("PFEleMvaID_RetrainedValue", pf_mva_id); // was called "pfmvaId"
+   ele.addUserFloat("PFEleMvaID_Run3CustomJpsitoEEValue", pf_mvacustom_id);   
 
    // Run-2 PF ele ID
    //   mva no iso
@@ -413,6 +425,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1Value", unbiased_seedBDT); // was called "unBiased"
    ele.addUserFloat("LPEleMvaID_2020Sept15Value", mva_id); // was called "mvaId"
    ele.addUserFloat("PFEleMvaID_RetrainedValue", 20.); // was called "pfmvaId"
+   ele.addUserFloat("PFEleMvaID_Run3CustomJpsitoEEValue", 20);   
 
    //need to add as placeholders
    // Run-2 PF ele ID

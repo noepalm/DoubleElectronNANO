@@ -9,6 +9,10 @@ from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
 
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 
+from PhysicsTools.BParkingNano.mvaElectronID_RunIII_custom_JPsitoEE_cff \
+    import mvaEleID_RunIII_custom_JPsitoEE_V1_producer_config
+mvaConfigsForEleProducer.append( mvaEleID_RunIII_custom_JPsitoEE_V1_producer_config )
+
 # evaluate MVA IDs for PF electrons
 # (Note:  custom IDs computed here instead of using PostRecoTools)
 myelectronMVAValueMapProducer = cms.EDProducer(
@@ -34,6 +38,8 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"), #includes trigger matching
     userFloats = cms.PSet(
         ElectronMVAEstimatorRun2BParkRetrainRawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+    
+    ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues") 
     ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainElePF"),
@@ -61,7 +67,8 @@ electronsForAnalysis = cms.EDProducer(
   # pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainValues"),
   # pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2Values"),
   # pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1Values"),
-  pfmvaId = cms.InputTag(""), #use embedded values
+  pfmvaId = cms.InputTag(""),
+  pfmvaIdcustom = cms.InputTag(""),#use embedded values
   pfmvaId_Run2 = cms.InputTag(""), #use embedded values
   pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
@@ -201,6 +208,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         LPEleSeed_Fall17UnBiasedV1Value = Var("userFloat('LPEleSeed_Fall17UnBiasedV1Value')",float,doc="Seed BDT for low-pT electrons, Fall17 unBiased model"), #@@ was called "unBiased"
         LPEleMvaID_2020Sept15Value = Var("userFloat('LPEleMvaID_2020Sept15Value')",float,doc="MVA ID for low-pT electrons, 2020Sept15 model"), #@@ was called "mvaId"
         PFEleMvaID_RetrainedValue = Var("userFloat('PFEleMvaID_RetrainedValue')",float,doc="MVA ID for PF electrons, BParkRetrainValues"), #@@ was called "pfmvaId"
+        PFEleMvaID_Run3CustomJpsitoEEValue = Var("userFloat('PFEleMvaID_Run3CustomJpsitoEEValue')",float,doc="Custom MVA ID for PF electrons, RunIIICustomJPsitoEERawValues"),                 
 
         PFEleMvaID_Fall17NoIsoV2Value   = Var("userFloat('PFEleMvaID_Fall17NoIsoV2Value')",float,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2"),
         PFEleMvaID_Fall17NoIsoV2wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wpLoose"),
