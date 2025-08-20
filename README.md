@@ -1,28 +1,40 @@
 # NanoAOD producer customized for BParking analyses 
 
-The focus is on RK/K*/phi analyses.
+This is a custom NANOAOD producer, based on the one developed for RK/K*/phi analyses, repurposed for analyses focused on the search for dielectron resonances.
 
 ## Recipe
 
-This recipe is for CMSSW_14_0_18, based on the updated working on 13_3_0 which is based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
+This recipe is for 13_3_0, based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
 
-Currently using release CMSSW_14_0_18 to be able to run on 2024 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID.
+Currently using release CMSSW_13_3_0 to be able to run on 2023 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID. This version has implemented the changes from [ppviscone/DoubleElectronNANO/14_0_18](https://github.com/pviscone/DoubleElectronNANO/tree/14_0_18) for a cleaner inclusion of NANOAOD variables.
 
 ### Getting started
 
 ```shell
-cmsrel CMSSW_14_0_18
-cd CMSSW_14_0_18/src
+cmsrel CMSSW_13_3_0
+cd CMSSW_13_3_0/src
 cmsenv
-git cms-merge-topic -u pviscone:14_0_18_dpee-refitter
+
+# Modifications to use post-fit quantities for electrons
+git cms-merge-topic -u DiElectronX:GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
+# Modifications to KinematicParticleVertexFitter
+git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X
+
+# Add the DoubleElectronNANO package
+git clone -b 13_3_0 git@github.com:noepalm/DoubleElectronNANO.git ./PhysicsTools
+
+# Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons + disabled Electron, LowPtElectron
+git cms-merge-topic -u noepalm:DoubleElectronNANO_nanoaodFix_noEleTable_leptonIso_1330
+
+# Adding EgammaPostRecoTools for Run 3 noIso electron ID fix (including Piero's fix for correct interplay with our custom Electron collections) 
 git clone -b dpee git@github.com:pviscone/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
-git clone -b 14_0_18 git@github.com:pviscone/DoubleElectronNANO.git PhysicsToolsTemp
-mv PhysicsToolsTemp/BParkingNano PhysicsTools
-rm -rf PhysicsToolsTemp
+
+# Build
 scram b -j `nproc`
 ```
 
 ### Run on a test file
+
 ```shell
 cd PhysicsTools/BParkingNano/test
 cmsRun run_nano_cfg.py        # by default, runs over Run 3 2023 data
