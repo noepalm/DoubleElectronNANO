@@ -58,7 +58,7 @@ myPFTriggerMatches = cms.EDProducer(
     # "PATTriggerMatcherDEtaLessByDR", # match by DeltaEta only, best match by DeltaR
     #"PATTriggerMatcherDEtaLessByDEta", # match by DeltaEta only, best match by DeltaEta
     "PATTriggerMatcherDRDPtLessByR", # match by DeltaR only, best match by DeltaR
-    src = cms.InputTag("slimmedElectrons"),
+    src = cms.InputTag("customSlimmedElectrons"),
     matched = cms.InputTag("myUnpackedPatTrigger"),
     matchedCuts = cms.string(paths_OR), # e.g. 'path("HLT_DoubleEle6_eta1p22_mMax6_v*")'
     maxDeltaR = cms.double(0.3),
@@ -76,7 +76,7 @@ myLPTriggerMatches = myPFTriggerMatches.clone(
 # https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatAlgos/plugins/PATTriggerMatchEmbedder.cc
 mySlimmedPFElectronsWithEmbeddedTrigger = cms.EDProducer(
     "PATTriggerMatchElectronEmbedder",
-    src = cms.InputTag("slimmedElectrons"),
+    src = cms.InputTag("customSlimmedElectrons"),
     matches = cms.VInputTag('myPFTriggerMatches'),
 )
 
@@ -110,7 +110,7 @@ hltHighLevel = cms.EDFilter("HLTHighLevel",
                             ),       
                             eventSetupPathsKey = cms.string(''), # not empty => use read paths from AlCaRecoTriggerBitsRcd via this key
                             andOr = cms.bool(True),              # how to deal with multiple triggers: True (OR) accept if ANY is true, False (AND) accept if ALL are true
-                            throw = cms.bool(True),              # throw exception on unknown path names
+                            throw = cms.bool(True),             # throw exception on unknown path names
 )
 
 #electronsTriggerSequence = cms.Sequence(
@@ -150,6 +150,20 @@ triggerMatchingStudy.toModify(myLPTriggerMatches,
 triggerMatchingStudy.toModify(hltHighLevel,
     HLTPaths = cms.vstring([]) # disable HLT selection
 )
+
+vbfSkimming2024.toModify(hltHighLevel,
+    HLTPaths = cms.vstring(
+        [ f"{p}_v*" for p in [
+        'HLT_VBF_DiPFJet125_45_Mjj1050',
+        'HLT_VBF_DiPFJet125_45_Mjj1200',
+        'HLT_VBF_DiPFJet50_Mjj600_Ele22_eta2p1_WPTight_Gsf',
+        'HLT_VBF_DiPFJet50_Mjj650_Ele22_eta2p1_WPTight_Gsf',
+        'HLT_VBF_DiPFJet50_Mjj650_Photon22',
+        'HLT_VBF_DiPFJet50_Mjj750_Photon22'
+        ]]
+    )
+)
+
 
 efficiencyStudy.toModify(hltHighLevel,
     HLTPaths = cms.vstring([]) # disable HLT selection

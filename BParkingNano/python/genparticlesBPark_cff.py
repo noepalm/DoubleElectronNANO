@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-from  PhysicsTools.NanoAOD.genparticles_cff import *
+from PhysicsTools.NanoAOD.common_cff import *
+from  PhysicsTools.NanoAOD.genparticles_cff import finalGenParticles, genParticleTable
 
 
 # for BPHPark start with merged particles (pruned + packed),

@@ -35,6 +35,10 @@ from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_BParkRetrain
     import mvaEleID_BParkRetrain_producer_config
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 
+from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIII_custom_JPsitoEE_cff \
+    import mvaEleID_RunIII_custom_JPsitoEE_V1_producer_config
+mvaConfigsForEleProducer.append( mvaEleID_RunIII_custom_JPsitoEE_V1_producer_config )
+
 print("mvaConfigsForEleProducer = ", mvaConfigsForEleProducer)
 
 electronMVAValueMapProducer = cms.EDProducer('ElectronMVAValueMapProducer',
@@ -46,7 +50,7 @@ electronMVAValueMapProducer = cms.EDProducer('ElectronMVAValueMapProducer',
                                              #
                                              # miniAOD case
                                              #
-                                             srcMiniAOD = cms.InputTag('slimmedElectrons', processName=cms.InputTag.skipCurrentProcess()),
+                                             srcMiniAOD = cms.InputTag('customSlimmedElectrons', processName=cms.InputTag.skipCurrentProcess()),
                                              #
                                              # MVA configurations
                                              #

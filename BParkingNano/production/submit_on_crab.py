@@ -1,6 +1,7 @@
 from CRABClient.UserUtilities import config
 import yaml
 import datetime
+import copy
 from fnmatch import fnmatch
 from argparse import ArgumentParser
 
@@ -22,6 +23,7 @@ config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '../test/run_nano_cfg.py'
 config.JobType.maxJobRuntimeMin = 3000
+config.JobType.maxMemoryMB = 3500
 config.JobType.allowUndistributedCMSSW = True
 
 config.section_('User')
@@ -50,8 +52,10 @@ if __name__ == '__main__':
   parser.add_argument('-yy', '--year', type=int, default=2023, help = 'Year of the dataset')
   parser.add_argument('-m', '--mode', type=str, default="reco", help= 'Reconstruction mode (reco = apply skim, eff = disable all selections)')
   parser.add_argument('-s', '--saveAllNanoContent', type=bool, default=False, help= 'Save all nano content (default = False)')
+  parser.add_argument('-sr', '--saveRegressionVars', type=bool, default=False, help='Save regression variables (default = False)')
   args = parser.parse_args()
 
+  configs = []
   with open(args.yaml) as f:
     doc = yaml.load(f,Loader=yaml.FullLoader) # Parse YAML file
     common = doc['common'] if 'common' in doc else {'data' : {}, 'mc' : {}}
@@ -106,21 +110,26 @@ if __name__ == '__main__':
             'year={:.0f}'.format(args.year),
             'mode={:s}'.format(args.mode),
             'saveAllNanoContent={:.0f}'.format(int(args.saveAllNanoContent)),
+            'saveRegressionVars={:.0f}'.format(int(args.saveRegressionVars)),
         ]
 
         ext1 = {False:'data', True:'mc'}
         ext2 = {3 : 'Run3', 2 : 'Run2'}
         ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
         ext4 = {True: 'allNano', False: ''}
+        ext5 = {True: 'withRegVars', False: ''}
 
         output_flags = ["DoubleElectronNANO", ext2[args.lhcRun], str(args.year), ext1[isMC]]
         if args.mode == "eff":
             output_flags.append(ext3[args.mode])
         if args.saveAllNanoContent:
             output_flags.append(ext4[args.saveAllNanoContent])
+        if args.saveRegressionVars:
+            output_flags.append(ext5[args.saveRegressionVars])
         output_flags.append(production_tag)
 
         config.JobType.outputFiles = ['_'.join(output_flags)+'.root']
+        config.Data.outLFNDirBase = '/store/group/cmst3/group/xee'
 
         if "HAHM" in name:
             config.Data.outLFNDirBase += '/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024'
@@ -135,10 +144,17 @@ if __name__ == '__main__':
             last_subfolder_pieces.append('noskim')
         if args.saveAllNanoContent:
             last_subfolder_pieces.append('allnanoColl')
-        
+        if args.saveRegressionVars:
+            last_subfolder_pieces.append('withRegVars')
+
         if len(last_subfolder_pieces) > 0:
             config.Data.outLFNDirBase += '/' + '_'.join(last_subfolder_pieces)
 
         print()
         print(config)
-        # submit(config)
+        config_copy = copy.deepcopy(config)
+        configs.append(config_copy)
+    print("Do you want to submit all task? (y/n)")
+    if input().strip().lower() == 'y':
+        for c in configs:
+            submit(c)

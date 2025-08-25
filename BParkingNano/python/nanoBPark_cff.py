@@ -1,7 +1,6 @@
 from __future__ import print_function
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
-from PhysicsTools.NanoAOD.globals_cff import *
 from PhysicsTools.NanoAOD.nano_cff import *
 from PhysicsTools.NanoAOD.vertices_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
@@ -61,7 +60,7 @@ def nanoAOD_customizeEgammaPostRecoTools(process):
                                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff',
                                 # # Run 2 BPark retrain
                                 # 'PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff',
-                                # 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_BParkRetrain_cff',
+'PhysicsTools.BParkingNano.mvaElectronID_RunIII_custom_JPsitoEE_cff',
                             ],
                             isMiniAOD=True,
                         )

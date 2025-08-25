@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_tools import *
+from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_tools import mvaClassName, mvaVariablesFile
 from os import path
 
 # Egamma presentation on this ID:

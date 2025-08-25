@@ -34,16 +34,6 @@ options.register("isPromptUpsilon", False,
     VarParsing.varType.bool,
     "Run this on prompt Upsilon MC (else J/psi)")
 
-options.register("isElectronFlat", False,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Run this on flat electron MC (else J/psi)")
-
-options.register("isECALIdealIC", False,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "When running on flat electron MC, use ECAL ideal intercalibrations (real otherwise)")
-
 options.register('globalTag', 'NOTSET',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
@@ -87,16 +77,22 @@ options.register('mode', "reco",
     "Run standard reco ('reco'), efficiency study ('eff'), or trigger matching study ('trg')"
 )
 
-options.register("saveRegressionVars", False,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Add regression variables to the output")
-
-options.setDefault('maxEvents', -1)
-
+options.setDefault('maxEvents', 1000)
 options.setDefault('tag', '130X')
 options.parseArguments()
-#print(options)
+
+#!TEST
+options.isMC = 0
+options.reportEvery = 1000
+options.tag = '2025Jun10'
+options.globalTag = '140X_dataRun3_v20'
+options.lhcRun = 3
+options.year = 2024
+options.mode = 'vbf'
+options.saveAllNanoContent = 1
+options.inputFiles = ["file:/afs/cern.ch/work/p/pviscone/CMSSW/CMSSW_14_0_18/src/test.root"]
+
+print(options)
 
 globaltag = None
 
@@ -112,7 +108,7 @@ elif options.year == 2024:
 else:
     raise ValueError("Year must be 2022 or 2023")
 
-if options._beenSet['globalTag']: globaltag = options.globalTag
+globaltag = options.globalTag
 
 print("Using global tag ", globaltag)
 
@@ -120,15 +116,12 @@ ext1 = {False:'data', True:'mc'}
 ext2 = {3 : 'Run3', 2 : 'Run2'}
 ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
 ext4 = {True: 'allNano', False: ''}
-ext5 = {True: 'withRegVars', False: ''}
 
 output_flags = ["DoubleElectronNANO", ext2[options.lhcRun], str(options.year), ext1[options.isMC]]
 if options.mode == "eff":
     output_flags.append(ext3[options.mode])
 if options.saveAllNanoContent:
     output_flags.append(ext4[options.saveAllNanoContent])
-if options.saveRegressionVars:
-    output_flags.append(ext5[options.saveRegressionVars])
 output_flags.append(options.tag)
 
 outputFileNANO = cms.untracked.string('_'.join(output_flags)+'.root')
@@ -160,28 +153,6 @@ if not options.inputFiles:
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/38fcb833-c4b1-4c31-9044-3867054bdd62.root',
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/95b2a773-125c-4b1e-8f3f-188a25a96bee.root',
         ] if options.isMC and options.isMinBias else [
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/7bf837da-3304-4c96-901d-42211b796f52.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/cf130663-fa52-4c45-910a-4b74f471984f.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/45207133-41c4-4491-ae48-155fbf212250.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/a0fe60dc-4231-4b16-be2d-6187d4a9ac3c.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/dc6b427f-a1e5-48c4-b10a-9a7ac54e8570.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/b204811b-d1a6-44dc-9b59-950c08339631.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/91c9855b-cf77-42fe-b7fe-08fac5a72211.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/bfc21610-b41d-494d-9380-b045c0848ae2.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/0f6173b4-e073-4e57-ba47-acd6cabc432f.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/13d313c0-af6a-40fc-8fdb-c4908dac60fe.root',
-        ] if options.isMC and options.isElectronFlat and options.isECALIdealIC else [
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/e332bb2f-ef2a-4b98-a2ad-4defea95069f.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/78dbd3b1-fe0f-48a8-b885-df2a65939735.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/02f9c9a8-071c-4d30-ae1c-5c636c4dd8db.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/f36892f2-58d9-41c4-80f7-55a34c4cc77c.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/2430000/1c61a85e-f451-4a26-82b1-397f083bd770.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/2430000/c9683705-3b5e-4ae8-bf17-0fd6d23510a4.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/2430000/c2c5bb9a-a4a6-48c1-9920-65d0dfcee165.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/2430000/c28eebbf-1f9c-4bfe-bdf8-9327a4383a89.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/2430000/4867900b-0a9c-4726-885f-ffde6ca8a7ce.root',
-            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/2430000/273f33a4-9376-4399-93c8-acfa8b0def37.root',
-        ] if options.isMC and options.isElectronFlat else [
             # central BuToKJpsi_JPsiToEE (should be similar), mini v1 bc of CMSSW compatibility reasons
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/0cc74dad-0a95-430d-82f1-113feb060680.root',
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/79ca5368-3191-42f6-877d-28760fbae9d8.root',
@@ -204,10 +175,10 @@ if not options.inputFiles:
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/60000/8dfdf330-83f9-475a-b057-c405baf43d3d.root',
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/60000/6db4a541-5fc9-4dbc-a799-d69a1be12d1f.root',
         ] if options.isMC else [
-            # 2022C - split 0
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/371/00000/b160219b-02dd-4858-a408-a3b1828ea504.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/375/00000/0487e761-50b3-4816-9b50-214915af2a6d.root',
+            # # 2022C - split 0
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/371/00000/b160219b-02dd-4858-a408-a3b1828ea504.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/375/00000/0487e761-50b3-4816-9b50-214915af2a6d.root',
             # # 2022C - split 1
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass1/MINIAOD/PromptReco-v1/000/356/170/00000/07cf47be-67de-4b52-8956-261221ac18a9.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass1/MINIAOD/PromptReco-v1/000/356/323/00000/4667ef56-54e3-4152-a6da-1100c492cd74.root',
@@ -223,22 +194,22 @@ if not options.inputFiles:
             # # 2022C - split 4
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/170/00000/8e4588b3-e391-4e2b-8507-a72dad99a244.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/316/00000/56545734-9a23-40dd-87d8-64534cddfdd8.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/321/00000/1000916f-8fd0-4e11-9550-43232984cae2.root',
+            # 'root://xrootds-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/321/00000/1000916f-8fd0-4e11-9550-43232984cae2.root',
             # # 2022C - split 5
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass5/MINIAOD/PromptReco-v1/000/356/170/00000/e247937b-47c5-4088-b39d-e0e631882072.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass5/MINIAOD/PromptReco-v1/000/356/309/00000/b84ab1ae-f20b-4ed9-89a2-301212d7adf5.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass5/MINIAOD/PromptReco-v1/000/356/309/00000/cc1a5ecb-683b-4fd2-8ce3-81706a68d634.root',
-            # # # 2022G - split 0
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/70000/9100e1f2-e6fb-4ad3-9201-c421c75031b8.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/4f3add8f-0e5d-4912-a551-1190126880d0.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/72ae4983-b3a9-415d-a0fe-8255914514f0.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/c2305f06-0a01-4ae4-bc3b-e56a83c8fc05.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/c53ba0e4-ca63-416b-8e3d-f4054994146d.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/1a5c9680-b43e-499a-9ce8-942b58ed205a.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/bd11a2df-4042-4b1f-848b-53d0e3dd4b6a.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/f98d00a9-9fae-4b43-a493-8d2c6570edae.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/1bcce943-0b63-4d77-b42e-e229fdbd9d88.root',
-            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/b8ea45a7-0b5e-4ee4-b8bb-5b20d7c8b2a0.root',
+            # # 2022G - split 0
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/70000/9100e1f2-e6fb-4ad3-9201-c421c75031b8.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/4f3add8f-0e5d-4912-a551-1190126880d0.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/72ae4983-b3a9-415d-a0fe-8255914514f0.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/c2305f06-0a01-4ae4-bc3b-e56a83c8fc05.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/c53ba0e4-ca63-416b-8e3d-f4054994146d.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/1a5c9680-b43e-499a-9ce8-942b58ed205a.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/bd11a2df-4042-4b1f-848b-53d0e3dd4b6a.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/f98d00a9-9fae-4b43-a493-8d2c6570edae.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/1bcce943-0b63-4d77-b42e-e229fdbd9d88.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/b8ea45a7-0b5e-4ee4-b8bb-5b20d7c8b2a0.root',
             # # 2022G - split 1
             # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass1/MINIAOD/22Sep2023-v1/2560000/5380218e-9582-4fe6-8e79-c85ac7cc4394.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass1/MINIAOD/22Sep2023-v1/2560000/be9acaeb-0508-43bf-aa72-c0cbf7c7efb2.root',
@@ -266,16 +237,16 @@ if not options.inputFiles:
             f'file:/eos/cms/store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024/HAHM_ZpToEE_012jets_VBF_INCLUSIVE_noVBFcuts_Leta1p22_LpT5_M5_k2e_4_eps0p05_13p6TeV_MINIAOD.root'
             # f'file:/eos/cms/store/group/phys_susy/SOS/DarkPhoton_130X_Run3/MINIAOD/HAHM_ZdToEE_M15/HAHM_ZdToEE_M15.job{i}.root' for i in range(30)
         ] if options.isMC and options.isSignal else [
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/3487564d-db3e-4737-9e8d-e7233ebb3239.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/1c55667a-c1d0-441e-8067-66537cfbe765.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/128fcafa-d605-44d7-8553-cbdea27218e0.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/b4ffc90f-79bd-4c5e-99be-1a29b4f4f980.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/bd99c6d8-f670-489d-b14e-c3ed2aa8cef3.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/4e7a0372-833c-42b9-9b12-b66323d58da7.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/d17b2e6c-57b1-4847-a9b1-c4b499035a34.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/a9ff0f8a-a896-47b2-bd6b-c01a4778166c.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/ae1fbe5b-aed2-4eb3-bcb2-b36b748872fe.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/09ad3d9d-c180-4be7-8fa3-8367f06ff0fc.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/3487564d-db3e-4737-9e8d-e7233ebb3239.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/1c55667a-c1d0-441e-8067-66537cfbe765.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/128fcafa-d605-44d7-8553-cbdea27218e0.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/b4ffc90f-79bd-4c5e-99be-1a29b4f4f980.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/bd99c6d8-f670-489d-b14e-c3ed2aa8cef3.root',
         ] if options.isMC and options.isPromptJpsi else [
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/c269e0a6-3b8c-40de-a1bb-b922341b8475.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/0b263174-e6e1-4697-9b48-399165df2b0a.root',
@@ -333,7 +304,6 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 # Process
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
-from Configuration.Eras.Modifier_run3_nanoAOD_124_cff import run3_nanoAOD_124
 
 # Attaching modifiers
 modifiers = []
@@ -365,15 +335,6 @@ elif options.mode == "vbf":
         modifiers.append(vbfSkimming2024)
 
 
-if options.saveRegressionVars:
-    # Save regression variables
-    # see python/electronsBPark_cff.py for list
-    modifiers.append(regressionVars)
-
-if options.saveAllNanoContent and options.year == 2022:
-    # add modifier for rerunning Tau IDs (WPs not included in 12_4_X MINIs, e.g. 2022)
-    modifiers.append(run3_nanoAOD_124)
-
 process = cms.Process('BParkNANO', eras.Run3, *modifiers)
 
 # import of standard configurations
@@ -388,7 +349,7 @@ process.load('PhysicsTools.BParkingNano.nanoBPark_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-# process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
+process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
 # process.MessageLogger.cerr.threshold = "DEBUG"
 # process.MessageLogger.debugModules = ["*"]
 
@@ -481,7 +442,6 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.nanoAOD_DiEle_step,
-#                                process.testProducer,
                                 process.endjob_step,
                                 process.NANOAODoutput_step)
 
@@ -500,11 +460,6 @@ process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
 ### from https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3287/1/1/1/1/1.html
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 process.NANOAODoutput.fakeNameForCrab=cms.untracked.bool(True)
-
-#print("=== SCHEDULE ===")
-#for path in process.paths:
-#    print(f"Path: {path}")
-#    print(process.paths[path].dumpPython())
 
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete

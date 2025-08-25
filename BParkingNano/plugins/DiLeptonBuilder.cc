@@ -81,6 +81,7 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserInt("l1_sel", l1_selection_(*l1_ptr));
       lepton_pair.addUserInt("l2_sel", l2_selection_(*l2_ptr));
       lepton_pair.setP4(l1_ptr->p4() + l2_ptr->p4());
+
       lepton_pair.setCharge(l1_ptr->charge() + l2_ptr->charge());
       lepton_pair.addUserFloat("lep_deltaR", reco::deltaR(*l1_ptr, *l2_ptr));
       int nlowpt=0;
@@ -108,9 +109,9 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       lepton_pair.addUserFloat("sv_prob", fitter.prob());
       // vertex variables
-      lepton_pair.addUserFloat("sv_x", lepton_pair.vx());
-      lepton_pair.addUserFloat("sv_y", lepton_pair.vy());
-      lepton_pair.addUserFloat("sv_z", lepton_pair.vz());
+      lepton_pair.addUserFloat("sv_x", fitter.success() ? fitter.fitted_vtx().x() : -1);
+      lepton_pair.addUserFloat("sv_y", fitter.success() ? fitter.fitted_vtx().y() : -1);
+      lepton_pair.addUserFloat("sv_z", fitter.success() ? fitter.fitted_vtx().z() : -1);
 
       lepton_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       lepton_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);

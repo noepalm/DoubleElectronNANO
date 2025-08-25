@@ -35,6 +35,10 @@
 <use   name="TrackingTools/GsfTracking"/>
 <use   name="DataFormats/EgammaCandidates"/>
 <use   name="DataFormats/BeamSpot"/>
+<use   name="EgammaAnalysis/ElectronTools"/>
+<use   name="DataFormats/EcalDetId"/>
+<use   name="Geometry/Records"/>
+
 <!--flags CXXFLAGS="-g"/-->  
 <library   file="*.cc" name="PhysicsToolsBParkingNanoPlugins">
   <flags   EDM_PLUGIN="1"/>

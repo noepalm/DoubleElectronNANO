@@ -10,7 +10,7 @@ electronPairs = cms.EDProducer(
     lep2Selection = cms.string(''),
     filterBySelection = cms.bool(True),
     preVtxSelection = cms.string(
-        f'mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'  
+        f'mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'
         # '&& abs(userCand("l1").vz - userCand("l2").vz) <= 1.'
     ),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
@@ -23,13 +23,13 @@ countDiElectrons = cms.EDFilter(
     minNumber = cms.uint32(1),
 )
 
-electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+electronPairsTable = cms.EDProducer("SimpleCompositeCandidateFlatTableProducer",
     src = cms.InputTag('electronPairs:SelectedDiLeptons'),
     cut = cms.string(""),
     name= cms.string("DiElectron"),
     doc = cms.string("SelectedElectron pairs for BPark with sucessful vertex fit"),
-    singleton = cms.bool(False), 
-    extension = cms.bool(False),                                                
+    singleton = cms.bool(False),
+    extension = cms.bool(False),
     variables = cms.PSet(P4Vars,
         lep_deltaR = Var("userFloat('lep_deltaR')", float, doc="deltaR between the two leptons"),
         lep_deltaVz = Var('abs(userCand("l1").vz - userCand("l2").vz)', float, doc="deltaVz between the two leptons"),
@@ -58,7 +58,7 @@ electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 )
 
 DiElectronSequence = cms.Sequence(
-    electronPairs + 
+    electronPairs +
     countDiElectrons +
     electronPairsTable
 )
@@ -83,7 +83,7 @@ DiElectronSequence = cms.Sequence(
 
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-efficiencyStudy.toModify(electronPairs, 
+efficiencyStudy.toModify(electronPairs,
     filterBySelection = cms.bool(False),
 )
 

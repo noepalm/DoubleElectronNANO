@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
-from PhysicsTools.NanoAOD.electrons_cff import *
-from PhysicsTools.NanoAOD.lowPtElectrons_cff import *
+from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, updatedLowPtElectrons
 
 # Electron ID MVA raw values
 mvaConfigsForEleProducer = cms.VPSet()
@@ -10,7 +9,11 @@ from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
 
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 
-# evaluate MVA IDs for PF electrons 
+from PhysicsTools.BParkingNano.mvaElectronID_RunIII_custom_JPsitoEE_cff \
+    import mvaEleID_RunIII_custom_JPsitoEE_V1_producer_config
+mvaConfigsForEleProducer.append( mvaEleID_RunIII_custom_JPsitoEE_V1_producer_config )
+
+# evaluate MVA IDs for PF electrons
 # (Note:  custom IDs computed here instead of using PostRecoTools)
 myelectronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
@@ -20,17 +23,25 @@ myelectronMVAValueMapProducer = cms.EDProducer(
 
 # change modifiedLowPtElectrons input to use embedded trigger matching
 modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
-#updatedLowPtElectrons.src  = cms.InputTag("modifiedLowPtElectrons")
+
+customModifiedLowPtElectrons = modifiedLowPtElectrons.clone(
+                                    src = cms.InputTag("modifiedLowPtElectrons")
+                                )
+customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
+                                src = cms.InputTag("customModifiedLowPtElectrons")
+                                )
 
 # compute electron seed gain
 seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"))
-seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("updatedLowPtElectrons"))
+seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("customUpdatedLowPtElectrons"))
 
 # embed IDs and additional variables in slimmedElectrons collection
 slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"), #includes trigger matching
     userFloats = cms.PSet(
         ElectronMVAEstimatorRun2BParkRetrainRawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+    
+    ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues") 
     ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainElePF"),
@@ -40,7 +51,7 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
 modifiedIDLowPtElectrons.src = cms.InputTag("updatedLowPtElectrons")
 
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
-    src = cms.InputTag("updatedLowPtElectrons"),
+    src = cms.InputTag("customUpdatedLowPtElectrons"),
     userFloats = cms.PSet(
         ids = cms.InputTag("modifiedIDLowPtElectrons:ids"),
     ),
@@ -64,11 +75,12 @@ electronsForAnalysis = cms.EDProducer(
   # pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainValues"),
   # pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2Values"),
   # pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1Values"),
-  pfmvaId = cms.InputTag(""), #use embedded values
+  pfmvaId = cms.InputTag(""),
+  pfmvaIdcustom = cms.InputTag(""),#use embedded values
   pfmvaId_Run2 = cms.InputTag(""), #use embedded values
   pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-  ## cleaning wrt trigger lepton [-1 == no cut] 
+  ## cleaning wrt trigger lepton [-1 == no cut]
   ## NB: even if cuts are turned off, electron will be skipped if trigger lepton collection is empty. DISABLE filterEle TO AVOID.
   filterEle = cms.bool(False), # If True, skip electrons too close to trigger electron OR from different PV (see flags below)
   drForCleaning_wrtTrgLepton = cms.double(-1.), # do not check for dR matching to trg objs
@@ -93,6 +105,9 @@ electronsForAnalysis = cms.EDProducer(
   # module flags
   addUserVarsExtra = cms.bool(False),
   efficiencyStudy = cms.bool(False), # If True, flag electron selections instead of cutting; saves extra variables
+  saveRegressionVars = cms.bool(False), # If True, save regression variables
+  recHitCollectionEB = cms.InputTag("reducedEgamma:reducedEBRecHits"),
+  recHitCollectionEE = cms.InputTag("reducedEgamma:reducedEERecHits"),
 )
 
 # finer trigger skim -- only select events that have >= 2 reco trigger-matched electrons
@@ -193,7 +208,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 
         tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
-    #    lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
+        # lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
         trkRelIso = Var("trackIso/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         isPF = Var("userInt('isPF')",bool,doc="electron is PF candidate"),
         isLowPt = Var("userInt('isLowPt')",bool,doc="electron is LowPt candidate"),
@@ -201,17 +216,18 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         LPEleSeed_Fall17UnBiasedV1Value = Var("userFloat('LPEleSeed_Fall17UnBiasedV1Value')",float,doc="Seed BDT for low-pT electrons, Fall17 unBiased model"), #@@ was called "unBiased"
         LPEleMvaID_2020Sept15Value = Var("userFloat('LPEleMvaID_2020Sept15Value')",float,doc="MVA ID for low-pT electrons, 2020Sept15 model"), #@@ was called "mvaId"
         PFEleMvaID_RetrainedValue = Var("userFloat('PFEleMvaID_RetrainedValue')",float,doc="MVA ID for PF electrons, BParkRetrainValues"), #@@ was called "pfmvaId"
+        PFEleMvaID_Run3CustomJpsitoEEValue = Var("userFloat('PFEleMvaID_Run3CustomJpsitoEEValue')",float,doc="Custom MVA ID for PF electrons, RunIIICustomJPsitoEERawValues"),                 
 
         PFEleMvaID_Fall17NoIsoV2Value   = Var("userFloat('PFEleMvaID_Fall17NoIsoV2Value')",float,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2"),
         PFEleMvaID_Fall17NoIsoV2wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wpLoose"),
         PFEleMvaID_Fall17NoIsoV2wp90    = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp90"),
         PFEleMvaID_Fall17NoIsoV2wp80    = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp80"),
-        
+
         PFEleMvaID_Fall17IsoV2Value     = Var("userFloat('PFEleMvaID_Fall17IsoV2Value')",float,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2"),
         PFEleMvaID_Fall17IsoV2wpLoose   = Var("userInt('PFEleMvaID_Fall17IsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2-wpLoose"),
         PFEleMvaID_Fall17IsoV2wp90      = Var("userInt('PFEleMvaID_Fall17IsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2-wp90"),
         PFEleMvaID_Fall17IsoV2wp80      = Var("userInt('PFEleMvaID_Fall17IsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2-wp80"),
-        
+
         PFEleCutID_Fall17V2wpLoose      = Var("userInt('PFEleCutID_Fall17V2wpLoose')",bool,doc="Cut ID for PF electrons, Fall17V2wpLoose"),
         PFEleCutID_Fall17V2wpMedium     = Var("userInt('PFEleCutID_Fall17V2wpMedium')",bool,doc="Cut ID for PF electrons, Fall17V2wpMedium"),
         PFEleCutID_Fall17V2wpTight      = Var("userInt('PFEleCutID_Fall17V2wpTight')",bool,doc="Cut ID for PF electrons, Fall17V2wpTight"),
@@ -220,11 +236,11 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         PFEleMvaID_Winter22NoIsoV1wp90  = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
         PFEleMvaID_Winter22NoIsoV1wp80  = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
 
-        PFEleMvaID_Winter22IsoV1Value = Var("userFloat('PFEleMvaID_Winter22IsoV1Value')",float,doc="MVA ID for PF electrons: RunIIIWinter22IsoV1Values"), 
+        PFEleMvaID_Winter22IsoV1Value = Var("userFloat('PFEleMvaID_Winter22IsoV1Value')",float,doc="MVA ID for PF electrons: RunIIIWinter22IsoV1Values",),
         PFEleMvaID_Winter22IsoV1wp90  = Var("userInt('PFEleMvaID_Winter22IsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-iso-V1-wp90"),
         PFEleMvaID_Winter22IsoV1wp80  = Var("userInt('PFEleMvaID_Winter22IsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-iso-V1-wp80"),
 
-        PFEleCutID_Winter22V1wpLoose  = Var("userInt('PFEleCutID_Winter22V1wpLoose')",bool,doc="Cut ID for PF electrons, Winter22V1wpLoose"),        
+        PFEleCutID_Winter22V1wpLoose  = Var("userInt('PFEleCutID_Winter22V1wpLoose')",bool,doc="Cut ID for PF electrons, Winter22V1wpLoose"),
         PFEleCutID_Winter22V1wpMedium = Var("userInt('PFEleCutID_Winter22V1wpMedium')",bool,doc="Cut ID for PF electrons, Winter22V1wpMedium"),
         PFEleCutID_Winter22V1wpTight  = Var("userInt('PFEleCutID_Winter22V1wpTight')",bool,doc="Cut ID for PF electrons, Winter22V1wpTight"),
 
@@ -245,7 +261,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         )
 )
 
-if electronsForAnalysis.addUserVarsExtra : 
+if electronsForAnalysis.addUserVarsExtra :
     electronBParkTable.variables = cms.PSet(
         electronBParkTable.variables,
         convValid = Var("userInt('convValid')",bool,doc="Valid conversion"),
@@ -269,12 +285,12 @@ if electronsForAnalysis.addUserVarsExtra :
         convDeltaExpectedNHitsInner = Var("userInt('convDeltaExpectedNHitsInner')",int,doc="Delta number of expected hits before vertex"),
         convDeltaCotFromPin = Var("userFloat('convDeltaCotFromPin')",float,doc="Delta cotangent theta from inner momenta"),
     )
-    
+
 electronsBParkMCMatchForTable = cms.EDProducer("MCMatcher",  # cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = electronBParkTable.src,                 # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"), # final mc-truth particle collection
     mcPdgId     = cms.vint32(11),                 # one or more PDG ID (11 = el, 22 = pho); absolute values (see below)
-    checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge  
+    checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge
     mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
     maxDeltaR   = cms.double(0.03),             # Maximum deltaR for the match
     maxDPtRel   = cms.double(0.5),              # Maximum deltaPt/Pt for the match
@@ -300,11 +316,10 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     branchName = cms.string("genPart"),
     docString = cms.string("MC matching to status==1 electrons or photons"),
 )
-    
-print("\033[93m before electronsBParkSequence \033[0m")
+
 electronsBParkSequence = cms.Sequence(
-    modifiedLowPtElectrons +
-    updatedLowPtElectrons +
+    customModifiedLowPtElectrons +
+    customUpdatedLowPtElectrons +
     myelectronMVAValueMapProducer +
     seedGainElePF +
     seedGainEleLowPt +
@@ -315,9 +330,9 @@ electronsBParkSequence = cms.Sequence(
 )
 
 electronBParkMC = cms.Sequence(
-    electronsBParkSequence + 
-    electronsBParkMCMatchForTable + 
-    selectedElectronsMCMatchEmbedded + 
+    electronsBParkSequence +
+    electronsBParkMCMatchForTable +
+    selectedElectronsMCMatchEmbedded +
     electronBParkMCTable
 )
 
@@ -338,11 +353,16 @@ from PhysicsTools.BParkingNano.modifiers_cff import *
 
 # DiEle.toModify(electronsForAnalysis, ...)
 
+# Trigger matching study
+vbfSkimming2023.toModify(countTrgElectrons, minNumber = cms.uint32(0))
+vbfSkimming2024.toModify(countTrgElectrons, minNumber = cms.uint32(0))
 triggerMatchingStudy.toModify(countTrgElectrons, minNumber = cms.uint32(0))
 
+
+# Selection efficiency study (-> disable all cuts, store them as flags)
 efficiencyStudy.toModify(electronsForAnalysis, efficiencyStudy = cms.bool(True))
 
-efficiencyStudy.toModify(electronBParkTable, 
+efficiencyStudy.toModify(electronBParkTable,
         variables = cms.PSet(
             electronBParkTable.variables,
             selection_ptCut = Var("userInt('selection_pTcut')",bool,doc="Passes pT cut"),
@@ -350,5 +370,98 @@ efficiencyStudy.toModify(electronBParkTable,
             # convVeto var already saved
         )
 )
-
 efficiencyStudy.toModify(countTrgElectrons, minNumber = cms.uint32(0))
+
+# Regression study (-> save extra variables needed for regression training and application)
+regressionVars.toModify(electronsForAnalysis, saveRegressionVars = cms.bool(True))
+
+regressionVars.toModify(electronBParkTable, 
+    variables = cms.PSet(
+        electronBParkTable.variables,
+        # regression variables
+        SCeta = Var("superCluster().eta()",float,doc="eta of the supercluster",precision=10),
+        SCphi = Var("superCluster().phi()",float,doc="phi of the supercluster",precision=10),
+        SCrawESenergy = Var("superCluster().preshowerEnergy()",float,doc="raw preshower energy of the supercluster",precision=10),
+        SCclustersSize = Var("superCluster().clustersSize()",int,doc="number of clusters in the supercluster"),
+        hadronicOverEm = Var("hadronicOverEm()",float,doc="H/E of the supercluster (rechits within cone)",precision=10),
+        hadronicOverEmBc = Var("hcalOverEcalBc()",float,doc="H/E of the supercluster (rechits behind clusters)",precision=10),
+        seedEta = Var("seed().eta()",float,doc="eta of the supercluster seed",precision=10),
+        seedPhi = Var("seed().phi()",float,doc="phi of the supercluster seed",precision=10),
+        seedEnergy = Var("seed().energy()",float,doc="energy of the supercluster seed",precision=10),
+        e3x3 = Var("userFloat('e3x3')",float,doc="e3x3 of the supercluster, calculated with full 5x5 region",precision=10),
+        e5x5 = Var("full5x5_e5x5()",float,doc="e5x5 of the supercluster, calculated with full 5x5 region",precision=10),
+        sigmaietaiphi = Var("full5x5_showerShape().sigmaIetaIphi",float,doc="sigma_IetaIphi of the supercluster, calculated with full 5x5 region",precision=10),
+        eMax = Var("full5x5_showerShape().eMax",float,doc="eMax of the supercluster, calculated with full 5x5 region",precision=10),
+        e2nd = Var("full5x5_showerShape().e2nd",float,doc="e2nd of the supercluster, calculated with full 5x5 region",precision=10),
+        eLeft = Var("full5x5_showerShape().eLeft",float,doc="eLeft of the supercluster, calculated with full 5x5 region",precision=10),
+        eRight = Var("full5x5_showerShape().eRight",float,doc="eRight of the supercluster, calculated with full 5x5 region",precision=10),
+        eTop = Var("full5x5_showerShape().eTop",float,doc="eTop of the supercluster, calculated with full 5x5 region",precision=10),
+        eBottom = Var("full5x5_showerShape().eBottom",float,doc="eBottom of the supercluster, calculated with full 5x5 region",precision=10),
+        e2x5Max = Var("full5x5_showerShape().e2x5Max",float,doc="e2x5Max of the supercluster, calculated with full 5x5 region",precision=10),
+        e2x5Top = Var("full5x5_showerShape().e2x5Top",float,doc="e2x5Top of the supercluster, calculated with full 5x5 region",precision=10),
+        e2x5Bottom = Var("full5x5_showerShape().e2x5Bottom",float,doc="e2x5Bottom of the supercluster, calculated with full 5x5 region",precision=10),
+        e2x5Left = Var("full5x5_showerShape().e2x5Left",float,doc="e2x5Left of the supercluster, calculated with full 5x5 region",precision=10),
+        e2x5Right = Var("full5x5_showerShape().e2x5Right",float,doc="e2x5Right of the supercluster, calculated with full 5x5 region",precision=10),
+
+        trkEtaMode = Var("gsfTrack().etaMode()",float,doc="eta of the gsf track", precision=10),
+        trkPhiMode = Var("gsfTrack().phiMode()",float,doc="phi of the gsf track", precision=10),
+        trkPmode = Var("gsfTrack().pMode()",float,doc="p of the gsf track", precision=10),
+        trkPVtx = Var("trackMomentumAtVtx().Mag2()",float,doc="momentum of the track at the vertex", precision=10),
+        trkPOut = Var("trackMomentumOut().Mag2()",float,doc="momentum of the track at the outermost point", precision=10),
+
+        nrSatCrys = Var("nSaturatedXtals()",int,doc="Number of saturated crystals in the supercluster"),
+
+        ecalEnergy = Var("ecalEnergy()",float,doc="ECAL energy of the electron",precision=10),
+        ecalEnergyErr = Var("ecalEnergyError()",float,doc="ECAL energy uncertainty of the electron",precision=10),
+
+        dEtaSeedSC = Var("seed().eta() - superCluster().eta() ",float,doc="delta eta (seed,track) with sign",precision=10),
+        dPhiSeedSC = Var("seed().phi() - superCluster().phi() ",float,doc="delta phi (seed,track) with sign",precision=10),
+
+        iEtaOrX = Var("userInt('iEtaOrX')",int,doc="ieta of the supercluster seed"),
+        iPhiOrY = Var("userInt('iPhiOrY')",int,doc="iphi of the supercluster seed"),
+        iEtaMod5 = Var("userInt('iEtaMod5')",int,doc="ieta of the supercluster seed mod 5"),
+        iPhiMod2 = Var("userInt('iPhiMod2')",int,doc="iphi of the supercluster seed mod 2"),
+        iEtaMod20 = Var("userInt('iEtaMod20')",int,doc="ieta of the supercluster seed mod 20"),
+        iPhiMod20 = Var("userInt('iPhiMod20')",int,doc="iphi of the supercluster seed mod 20"),
+
+        etaCrySeed = Var("userInt('etaCrySeed')", int, doc="eta of seed in crystal indices"),
+        phiCrySeed = Var("userInt('phiCrySeed')", int, doc="phi of seed in crystal indices"),
+
+        eSubClusters = Var("userFloat('eSubClusters')",int,doc="number of subclusters in the supercluster"),
+        subClusterEnergy1 = Var("userFloat('subClusterEnergy1')",float,doc="energy of the first subcluster (excluding seed)",precision=10),
+        subClusterEta1 = Var("userFloat('subClusterEta1')",float,doc="eta of the first subcluster (excluding seed)",precision=10),
+        subClusterPhi1 = Var("userFloat('subClusterPhi1')",float,doc="phi of the first subcluster (excluding seed)",precision=10),
+        subClusterEmax1 = Var("userFloat('subClusterEmax1')",float,doc="Emax of the first subcluster (excluding seed)",precision=10),
+        subClusterE3x3_1 = Var("userFloat('subClusterE3x31')",float,doc="E3x3 of the first subcluster (excluding seed)",precision=10),
+        subClusterEnergy2 = Var("userFloat('subClusterEnergy2')",float,doc="energy of the second subcluster (excluding seed)",precision=10),
+        subClusterEta2 = Var("userFloat('subClusterEta2')",float,doc="eta of the second subcluster (excluding seed)",precision=10),
+        subClusterPhi2 = Var("userFloat('subClusterPhi2')",float,doc="phi of the second subcluster (excluding seed)",precision=10),
+        subClusterEmax2 = Var("userFloat('subClusterEmax2')",float,doc="Emax of the second subcluster (excluding seed)",precision=10),
+        subClusterE3x3_2 = Var("userFloat('subClusterE3x32')",float,doc="E3x3 of the second subcluster (excluding seed)",precision=10),
+        subClusterEnergy3 = Var("userFloat('subClusterEnergy3')",float,doc="energy of the third subcluster (excluding seed)",precision=10),
+        subClusterEta3 = Var("userFloat('subClusterEta3')",float,doc="eta of the third subcluster (excluding seed)",precision=10),
+        subClusterPhi3 = Var("userFloat('subClusterPhi3')",float,doc="phi of the third subcluster (excluding seed)",precision=10),
+        subClusterEmax3 = Var("userFloat('subClusterEmax3')",float,doc="Emax of the third subcluster (excluding seed)",precision=10),
+        subClusterE3x3_3 = Var("userFloat('subClusterE3x33')",float,doc="E3x3 of the third subcluster (excluding seed)",precision=10),
+
+        clusterMaxDR = Var("userFloat('clusterMaxDR')", float, doc = "maximum dR of subclusters wrt seed"),
+        clusterMaxDRDPhi = Var("userFloat('clusterMaxDRDPhi')", float, doc = "dphi of subcluster with maximum dR wrt seed"),
+        clusterMaxDRDEta = Var("userFloat('clusterMaxDRDEta')", float, doc = "deta of subcluster with maximum dR wrt seed"),
+        clusterMaxDRRawEnergy = Var("userFloat('clusterMaxDRRawEnergy')", float, doc = "raw energy of subcluster with maximum dR wrt seed"),
+
+        nPreshowerClusters = Var("userInt('nPreshowerClusters')",int,doc="number of preshower clusters in the supercluster"),
+        eESClusters = Var("userFloat('eESClusters')",float,doc="energy of the first preshower cluster",precision=10),
+        esClusterEnergy0 = Var("userFloat('esClusterEnergy0')",float,doc="energy of the first preshower cluster",precision=10),
+        esClusterEta0 = Var("userFloat('esClusterEta0')",float,doc="eta of the first preshower cluster",precision=10),
+        esClusterPhi0 = Var("userFloat('esClusterPhi0')",float,doc="phi of the first preshower cluster",precision=10),
+        esClusterEnergy1 = Var("userFloat('esClusterEnergy1')",float,doc="energy of the second preshower cluster",precision=10),
+        esClusterEta1 = Var("userFloat('esClusterEta1')",float,doc="eta of the second preshower cluster",precision=10),
+        esClusterPhi1 = Var("userFloat('esClusterPhi1')",float,doc="phi of the second preshower cluster",precision=10),
+        esClusterEnergy2 = Var("userFloat('esClusterEnergy2')",float,doc="energy of the third preshower cluster",precision=10),
+        esClusterEta2 = Var("userFloat('esClusterEta2')",float,doc="eta of the third preshower cluster",precision=10),
+        esClusterPhi2 = Var("userFloat('esClusterPhi2')",float,doc="phi of the third preshower cluster",precision=10),        
+
+        isEB = Var("isEB()",bool,doc="is EB?"),
+    )
+)
+

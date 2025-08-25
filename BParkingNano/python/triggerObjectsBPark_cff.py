@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-from  PhysicsTools.NanoAOD.triggerObjects_cff import *
+from PhysicsTools.NanoAOD.common_cff import *
+from  PhysicsTools.NanoAOD.triggerObjects_cff import unpackedPatTrigger
 
 ### Muons
 
