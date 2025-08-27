@@ -176,10 +176,6 @@ lowPtIDProducer::~lowPtIDProducer() {
 
 // ------------ method called to produce the data  ------------
 void lowPtIDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  //using namespace edm;
-  
-  //std::cout<<"\033[93m thing is doing the thing \033[0m"<<std::endl;
-  
   const auto& rho = iEvent.get(rho_);
 
   edm::Handle<std::vector<pat::Electron>> electrons;
@@ -385,10 +381,8 @@ int lowPtIDProducer::matchToTruth(reco::GsfElectron const& recoEle,
   }
   //See if closest electron is close enough. If not, no match found.
   if(closestGen == nullptr || dR >= deltaR_){
-    std::cout<<"UNMATCHED\n";
     return UNMATCHED;
   }
-  std::cout<<"MATCHED\n";
   if(closestGen->fromHardProcessFinalState() || closestGen->isPromptFinalState()){return TRUE_PROMPT_ELECTRON;}
   if(closestGen->isDirectHardProcessTauDecayProductFinalState()){return TRUE_ELECTRON_FROM_TAU;}
   return TRUE_NON_PROMPT_ELECTRON;
