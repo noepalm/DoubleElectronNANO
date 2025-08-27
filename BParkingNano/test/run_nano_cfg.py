@@ -122,7 +122,7 @@ ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
 ext4 = {True: 'allNano', False: ''}
 ext5 = {True: 'withRegVars', False: ''}
 
-output_flags = ["DoubleElectronNANO", ext2[options.lhcRun], str(options.year), ext1[options.isMC]]
+output_flags = ["DoubleElectronNANO_v2", ext2[options.lhcRun], str(options.year), ext1[options.isMC]]
 if options.mode == "eff":
     output_flags.append(ext3[options.mode])
 if options.saveAllNanoContent:

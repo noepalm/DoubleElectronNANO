@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
-from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, updatedLowPtElectrons
+from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, updatedLowPtElectrons, modifiedIDLowPtElectrons
 
 # Electron ID MVA raw values
 mvaConfigsForEleProducer = cms.VPSet()
@@ -22,10 +22,11 @@ myelectronMVAValueMapProducer = cms.EDProducer(
 )
 
 # change modifiedLowPtElectrons input to use embedded trigger matching
-modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
+#modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
 
 customModifiedLowPtElectrons = modifiedLowPtElectrons.clone(
-                                    src = cms.InputTag("modifiedLowPtElectrons")
+                                    #src = cms.InputTag("modifiedLowPtElectrons")
+                                    src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
                                 )
 customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
                                 src = cms.InputTag("customModifiedLowPtElectrons")
@@ -48,10 +49,11 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     )
 )
 
-modifiedIDLowPtElectrons.src = cms.InputTag("updatedLowPtElectrons")
+modifiedIDLowPtElectrons.src = cms.InputTag("customUpdatedLowPtElectrons")
 
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("customUpdatedLowPtElectrons"),
+    #src = cms.InputTag("modifiedIDLowPtElectrons"),
     userFloats = cms.PSet(
         ids = cms.InputTag("modifiedIDLowPtElectrons:ids"),
     ),
