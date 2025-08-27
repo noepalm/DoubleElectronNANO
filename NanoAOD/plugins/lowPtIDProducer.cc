@@ -3,7 +3,7 @@
 // Package:    PhysicsTools/lowPtIDProducer
 // Class:      lowPtIDProducer
 //
-/**\class lowPtIDProducer lowPtIDProducer.cc PhysicsTools/lowPtIDProducer/plugins/lowPtIDProducer.cc
+/**\class lowPtIDProducer lowPtIDProducer.cc PhysicsTools/NanoAOD/plugins/lowPtIDProducer.cc
 
  Description: [one line class summary]
 
@@ -36,8 +36,6 @@
 #include "CommonTools/BaseParticlePropagator/interface/RawParticle.h"
 #include "CommonTools/MVAUtils/interface/GBRForestTools.h"
 #include "CondFormats/GBRForest/interface/GBRTree.h"
-
-//#include "TMVA/GBRForest.h"
 
 #include <iostream>
 #include <fstream>
@@ -95,7 +93,6 @@ private:
   const edm::EDGetTokenT<edm::View<reco::GenParticle>> genParticles_;
 
   const std::string modelFile_;
-  //std::unique_ptr<const GBRForest> forest_;
   GBRForest* forest_;
 
   // ----------member data ---------------------------
@@ -388,20 +385,8 @@ int lowPtIDProducer::matchToTruth(reco::GsfElectron const& recoEle,
   return TRUE_NON_PROMPT_ELECTRON;
 }
 
-// ------------ method called once each stream before processing any runs, lumis or events  ------------
-void lowPtIDProducer::beginStream(edm::StreamID) {
-  // please remove this method if not needed
-}
-
-// ------------ method called once each stream after processing all runs, lumis and events  ------------
-void lowPtIDProducer::endStream() {
-  // please remove this method if not needed
-}
-
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void lowPtIDProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("src", edm::InputTag("slimmedLowPtElectrons"));
   desc.add<edm::InputTag>("rho", edm::InputTag("fixedGridRhoFastjetAll"));
@@ -410,7 +395,6 @@ void lowPtIDProducer::fillDescriptions(edm::ConfigurationDescriptions& descripti
   desc.add<bool>("isMC", false);
   desc.add<bool>("doMatch", false);
   desc.add<double>("deltaR", 0.03);
-  //desc.add<edm::InputTag>("genParticles", edm::InputTag("prunedGenParticles"));
   descriptions.addDefault(desc);
 }
 
