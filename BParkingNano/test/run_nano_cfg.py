@@ -122,7 +122,7 @@ ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
 ext4 = {True: 'allNano', False: ''}
 ext5 = {True: 'withRegVars', False: ''}
 
-output_flags = ["DoubleElectronNANO_v2", ext2[options.lhcRun], str(options.year), ext1[options.isMC]]
+output_flags = ["DoubleElectronNANO", ext2[options.lhcRun], str(options.year), ext1[options.isMC]]
 if options.mode == "eff":
     output_flags.append(ext3[options.mode])
 if options.saveAllNanoContent:
@@ -481,7 +481,6 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.nanoAOD_DiEle_step,
-#                                process.testProducer,
                                 process.endjob_step,
                                 process.NANOAODoutput_step)
 
@@ -500,11 +499,6 @@ process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
 ### from https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3287/1/1/1/1/1.html
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
 process.NANOAODoutput.fakeNameForCrab=cms.untracked.bool(True)
-
-#print("=== SCHEDULE ===")
-#for path in process.paths:
-#    print(f"Path: {path}")
-#    print(process.paths[path].dumpPython())
 
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete

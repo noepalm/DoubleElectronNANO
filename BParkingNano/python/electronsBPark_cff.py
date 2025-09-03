@@ -22,10 +22,7 @@ myelectronMVAValueMapProducer = cms.EDProducer(
 )
 
 # change modifiedLowPtElectrons input to use embedded trigger matching
-#modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
-
 customModifiedLowPtElectrons = modifiedLowPtElectrons.clone(
-                                    #src = cms.InputTag("modifiedLowPtElectrons")
                                     src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
                                 )
 customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
@@ -53,7 +50,6 @@ modifiedIDLowPtElectrons.src = cms.InputTag("customUpdatedLowPtElectrons")
 
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("customUpdatedLowPtElectrons"),
-    #src = cms.InputTag("modifiedIDLowPtElectrons"),
     userFloats = cms.PSet(
         ids = cms.InputTag("modifiedIDLowPtElectrons:ids"),
     ),
@@ -466,4 +462,3 @@ regressionVars.toModify(electronBParkTable,
         isEB = Var("isEB()",bool,doc="is EB?"),
     )
 )
-
