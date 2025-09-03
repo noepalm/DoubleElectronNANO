@@ -258,8 +258,8 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         convTrail = Var("userInt('convTrail')",bool,doc="Matched to trailing track from conversion"),
         convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
         skipEle = Var("userInt('skipEle')",bool,doc="Is ele skipped (due to small dR or large dZ w.r.t. trigger)?"),
-        newID = Var("userFloat('ids')", float, doc="new run3 ID", precision=6),
-        matchedToGenEle = Var("userInt('matchedToGenEle')", int, doc="matched to gen ele"),
+        lowPtID_10Jun2025 = Var("userFloat('ids')", float, doc="new run3 ID, trained on JPsiToEE 2023 events", precision=6),
+        #matchedToGenEle = Var("userInt('matchedToGenEle')", int, doc="matched to gen ele"),
         )
 )
 
