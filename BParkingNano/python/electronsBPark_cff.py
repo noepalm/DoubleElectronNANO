@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
-from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, updatedLowPtElectrons
+from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, updatedLowPtElectrons, modifiedIDLowPtElectrons
 
 # Electron ID MVA raw values
 mvaConfigsForEleProducer = cms.VPSet()
@@ -46,10 +46,16 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     )
 )
 
+modifiedIDLowPtElectrons.src = cms.InputTag("customUpdatedLowPtElectrons")
+
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("customUpdatedLowPtElectrons"),
+    userFloats = cms.PSet(
+        ids = cms.InputTag("modifiedIDLowPtElectrons:ids"),
+    ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainEleLowPt"),
+        matchedToGenEle = cms.InputTag("modifiedIDLowPtElectrons:matchedToGenEle"),
     ),
 )
 
@@ -248,6 +254,8 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         convTrail = Var("userInt('convTrail')",bool,doc="Matched to trailing track from conversion"),
         convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
         skipEle = Var("userInt('skipEle')",bool,doc="Is ele skipped (due to small dR or large dZ w.r.t. trigger)?"),
+        lowPtID_10Jun2025 = Var("userFloat('ids')", float, doc="new run3 ID, trained on JPsiToEE 2023 events", precision=6),
+        #matchedToGenEle = Var("userInt('matchedToGenEle')", int, doc="matched to gen ele"),
         )
 )
 
@@ -313,6 +321,7 @@ electronsBParkSequence = cms.Sequence(
     myelectronMVAValueMapProducer +
     seedGainElePF +
     seedGainEleLowPt +
+    modifiedIDLowPtElectrons +
     slimmedPFElectronsWithUserData +
     slimmedLowPtElectronsWithUserData +
     electronsForAnalysis

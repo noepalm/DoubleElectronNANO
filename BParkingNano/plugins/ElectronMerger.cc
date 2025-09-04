@@ -322,6 +322,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("dzTrg", dzTrg);
    ele.addUserInt("skipEle",skipEle);
 
+   //Add for low pt id
+   ele.addUserFloat("ids", -999.);
+   ele.addUserInt("matchedToGenEle", 0); //FIXME temporary for matchedToGenEle tests
+
    // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection (NO MATCHES EXPECTED)
    ConversionInfo info;
    ConversionInfo::match(beamSpot,conversions,ele,info);
@@ -476,7 +480,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    ele_out       -> emplace_back(ele);
   }
-}
+}//end of if(saveLowPtE_)
 
   // Isolation (+ correction)
   size_t ie=-1;
